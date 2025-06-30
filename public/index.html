@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>F1 Schedule</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h1>F1 Schedule {{ year }}</h1>
+    <button @click="load">Load Schedule</button>
+    <ul>
+      <li v-for="race in races" :key="race.round">
+        <strong>{{ race.round }}</strong> - {{ race.name }} - {{ race.date }}
+      </li>
+    </ul>
+    <p v-if="error" style="color:red">{{ error }}</p>
+  </div>
+
+  <script>
+  const { createApp } = Vue;
+  createApp({
+    data() {
+      return { year: '', races: [], error: '' };
+    },
+    methods: {
+      async load() {
+        this.error = '';
+        try {
+          const res = await fetch('/api/schedule');
+          if (!res.ok) throw new Error('Failed to load');
+          const data = await res.json();
+          this.year = data.year;
+          this.races = data.races;
+        } catch(e) {
+          this.error = e.message;
+        }
+      }
+    },
+    mounted() {
+      this.load();
+    }
+  }).mount('#app');
+  </script>
+</body>
+</html>
